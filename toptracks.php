@@ -5,7 +5,7 @@
     <title>Home</title>
     <link rel="stylesheet" type="text/css" href="index.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="home.js"></script>
+    <script src="tracks.js"></script>
     <?php include 'menubar.php'; ?>
 </head>
 <body>
@@ -16,7 +16,7 @@
         <li><a href="#" data-timeframe="medium_term">6 MONTHS</a></li>
         <li><a href="#" data-timeframe="long_term">ALL TIME</a></li>
     </ul>
-    <div id="artistImages"></div>
-    <div id='artist-list'></div>
+    <div id="albumCovers"></div>
+    <div id='track-list'></div>
 
 </body>

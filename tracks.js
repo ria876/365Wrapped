@@ -12,25 +12,24 @@ $(document).ready(function () {
         }, {});
 
    
-    let _token = hash.access_token;
-    if (_token) {
-        document.cookie = `token=${_token}; max-age=3600`;
-        console.log('Token is available');
-    } else {
-        let cookies = document.cookie.split('; ');
+    let _token; 
+    let cookies = document.cookie.split('; ');
 
-        for (let i = 0; i < cookies.length; i++) {
-            let cookie = cookies[i];
-            let [name, value] = cookie.split('=');
+    for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i];
+        let [name, value] = cookie.split('=');
 
-            if (name === 'token') {
-                _token = value;
-                break;
-            }
+        if (name === 'token') {
+            _token = value;
+            break;
         }
     }
+    
+
     if (_token) {
         
+        console.log('Token is available');
+
         
         const fetchAndUpdateData = (timeFrame) => {
             
@@ -42,14 +41,14 @@ $(document).ready(function () {
             .then(response => response.json())
             .then(data => {
                 console.log(data);
-                $('#user-name').text(`${data.display_name}'s Top Artists`);
+                $('#user-name').text(`${data.display_name}'s Top Tracks`);
             })
             .catch(error => {
                 console.error('Error:', error);
             });
 
             
-            fetch(`https://api.spotify.com/v1/me/top/artists?time_range=${timeFrame}`, {
+            fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=${timeFrame}`, {
                 headers: {
                     'Authorization': 'Bearer ' + _token
                 }
@@ -60,78 +59,64 @@ $(document).ready(function () {
                 let imagesHTML = '<div style="display: flex; flex-direction: row; justify-content: space-around; ">';
 
                 for (let i = 0; i < Math.min(data.items.length, 5); i++) {
-                    const artist = data.items[i];
+                    const tracks = data.items[i];
 
     
-                    if (artist.images && artist.images[0]) {
+                    if (tracks.album.images && tracks.album.images[0]) {
                         imagesHTML += `
                             <div style="text-align: center; margin: 0 10px;">
-                                <img src="${artist.images[0].url}" alt="${artist.name}" style="width: 150px; height: 150px;">
-                                <p>${artist.name}</p>
+                                <img src="${tracks.album.images[0].url}" alt="${tracks.name}" style="width: 150px; height: 150px;">
+                                <p>${tracks.name}</p>
                             </div>
                         `;
                     }
                 }
 
-                document.getElementById('artistImages').innerHTML = imagesHTML;
+                document.getElementById('albumCovers').innerHTML = imagesHTML;
 
                 let tableHTML = `
                     <table>
                         <thead>
                             <tr>
                                 <td>Rank</td>
+                                <td>Track</td>
                                 <td>Artist</td>
-                                <td>Genres</td>
                             </tr>
                         </thead>
                         <tbody>
                 `;
 
                 for (let i = 0; i < data.items.length; i++) {
-                    const artist = data.items[i];
+                    const track = data.items[i];
+                    const artistNames = track.artists.map(artist => artist.name).join(', ');
                     tableHTML += `
                         <tr>
                             <td>${i + 1}</td>
-                            <td>${artist.name}</td>
-                            <td>${artist.genres}</td>
+                            <td>${track.name}</td>
+                            <td>${artistNames}</td>
                         </tr>
                     `;
                 }
 
                 tableHTML += '</tbody></table>';
-                document.getElementById('artist-list').innerHTML = tableHTML;
+                document.getElementById('track-list').innerHTML = tableHTML;
             })
             .catch(error => {
                 console.error('Error:', error);
             });
         };
 
-        
+        // Initial fetch with default time frame
         fetchAndUpdateData('short_term');
 
-        
+        // Event listener for time frame selection change
         $('#time-frame a').on('click', function (event) {
             event.preventDefault();
             const selectedTimeFrame = $(this).data('timeframe');
             fetchAndUpdateData(selectedTimeFrame);
         });
 
-    }else{
-
-        let cookies = document.cookie.split('; ');
-
-        for (let i = 0; i < cookies.length; i++) {
-            let cookie = cookies[i];
-            let [name, value] = cookie.split('=');
-
-            if (name === 'token') {
-                _token = value;
-                break;
-            }
-        }
-    } 
-    if (!_token) {
+    } else {
         console.log('Token is not available');
     }
-
 });
